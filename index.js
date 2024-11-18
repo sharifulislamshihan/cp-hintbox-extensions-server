@@ -3,6 +3,8 @@ const cors = require("cors");
 const axios = require("axios");
 require("dotenv").config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const NodeCache = require("node-cache");
+const cache = new NodeCache();
 
 
 const app = express();
@@ -34,7 +36,8 @@ app.post('/geminiapi', async (req, res) => {
         const result = await model.generateContent(prompt);
 
         // Get the message from the result
-        const generatedMessage = await result.response.text();
+        const generatedMessage = result.response.text() || "Response text unavailable. Try again!";
+        cache.set(prompt, generatedMessage, 7200); // Cache for 2 hour
 
         res.json(generatedMessage);
 
